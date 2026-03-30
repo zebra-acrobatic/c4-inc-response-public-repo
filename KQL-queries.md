@@ -1,94 +1,31 @@
-# KQL Queries for Incident Response
+## Example 1: Detecting Failed Login Attempts
+This query identifies failed login attempts from the `DeviceLogonEvents` table.
 
-This file contains a community-contributed list of Kusto Query Language (KQL) queries useful for incident response and threat hunting. Students are encouraged to add their own queries!
-
----
-
-## Getting Started with KQL
-
-KQL (Kusto Query Language) is used in Microsoft Sentinel, Microsoft Defender, and Azure Monitor to search and analyse log data. It is a powerful tool for security analysts and incident responders.
-
----
-
-## Contributed Queries
-
-### 1. List all failed sign-in attempts
 ```kql
-SigninLogs
-| where ResultType != 0
-| project TimeGenerated, UserPrincipalName, ResultDescription, IPAddress, Location
-| order by TimeGenerated desc
+DeviceLogonEvents
+| where ActionType in ("LogonFailed")
+| where AccountDomain in ("tdm")
 ```
 
-### 2. Detect multiple failed sign-ins from the same IP
-```kql
-SigninLogs
-| where ResultType != 0
-| summarize FailedAttempts = count() by IPAddress, bin(TimeGenerated, 1h)
-| where FailedAttempts > 10
-| order by FailedAttempts desc
-```
+=== "Targetting a Specific Workstation"
+    ```kql
+    DeviceLogonEvents
+    | where DeviceName in ("a103-01.tdm.local")
+    ```
 
-### 3. List recently created user accounts
-```kql
-AuditLogs
-| where OperationName == "Add user"
-| project TimeGenerated, InitiatedBy, TargetResources
-| order by TimeGenerated desc
-```
-
-### 4. Find processes executed on a device
-```kql
-DeviceProcessEvents
-| where DeviceName == "<your-device-name>"
-| project TimeGenerated, FileName, ProcessCommandLine, AccountName
-| order by TimeGenerated desc
-```
-
-### 5. Detect suspicious PowerShell commands
-```kql
-DeviceProcessEvents
-| where FileName =~ "powershell.exe"
-| where ProcessCommandLine has_any ("Invoke-Expression", "IEX", "EncodedCommand", "-enc", "DownloadString")
-| project TimeGenerated, DeviceName, AccountName, ProcessCommandLine
-| order by TimeGenerated desc
-```
-
-### 6. List network connections to external IPs
+=== "Focusing on a Specific User"
+    ```kql
+    DeviceLogonEvents
+    | where AccountName in ("smitha")  
+    ```
+## Example 2: Network Connections from a Specific Device
+This query retrieves network connection events from the `DeviceNetworkEvents` table for a specific device.
 ```kql
 DeviceNetworkEvents
-| where RemoteIPType == "Public"
-| project TimeGenerated, DeviceName, RemoteIP, RemotePort, LocalIP
-| order by TimeGenerated desc
+| where DeviceName in ("a103-01.tdm.local")
 ```
 
-### 7. Search for a specific file hash across devices
-```kql
-DeviceFileEvents
-| where SHA256 == "<paste-hash-here>"
-| project TimeGenerated, DeviceName, FileName, FolderPath, ActionType
-| order by TimeGenerated desc
-```
+### Contribute Your Own Queries
+Feel free to contribute your own KQL queries to this documentation! If you have a useful query that you think would benefit others, please submit a pull request with your query and a brief description of what it does and how it can be used in investigations.
 
-### 8. Find emails with suspicious attachments
-```kql
-EmailAttachmentInfo
-| where FileType in ("exe", "vbs", "ps1", "bat", "js")
-| project TimeGenerated, SenderFromAddress, RecipientEmailAddress, FileName, FileType
-| order by TimeGenerated desc
-```
-
----
-
-## Add Your Own Query
-
-Have a useful KQL query? Follow the [contribution guide in the README](README.md) to add it here!
-
-Use this template when adding a new query:
-
-````markdown
-### <number>. <Short description of what the query does>
-```kql
-<your KQL query here>
-```
-````
+To do this, go to the Github page: 
