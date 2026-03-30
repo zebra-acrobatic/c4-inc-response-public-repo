@@ -29,3 +29,4 @@ DeviceNetworkEvents
 Feel free to contribute your own KQL queries to this documentation! If you have a useful query that you think would benefit others, please submit a pull request with your query and a brief description of what it does and how it can be used in investigations.
 
 To do this, go to the Github page: 
+https://github.com/zebra-acrobatic/c4-inc-response-public-repo
